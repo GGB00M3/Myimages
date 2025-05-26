@@ -1,28 +1,41 @@
-name: Metrics
+name: 3D Contribution Metrics
 on:
-  schedule: [{ cron: "0 */6 * * *" }]  # 注意：原 cron 表达式末尾有多余空格，已删除！！！
+  schedule: 
+    - cron: "0 */6 * * *"  # 每6小时运行一次（UTC时间）
   workflow_dispatch:
-  push: {branches: ["main"]}  # 建议统一分支为 `main`
+  push:
+    branches: [ "main" ]
 
 jobs:
-  github-metrics:
+  generate-3d:
     runs-on: ubuntu-latest
-    environment: 
-      name: production
+    environment: production
+    
     permissions:
-      contents: write  # 必须要有写入权限
+      contents: write
+      actions: read  # 新增推荐权限
+      pull-requests: write
+    
     steps:
-      - uses: lowlighter/metrics@latest
+      - name: Generate 3D SVG
+        uses: lowlighter/metrics@latest
         with:
-          token: ${{ secrets.METRICS_TOKEN }}
-          user: GGB00M3  # 你的 GitHub 用户名
-          # 3D 模板核心配置
+          # 认证配置
+          token: ${{ secrets.GITHUB_TOKEN || secrets.METRICS_TOKEN }}
+          
+          # 核心参数
+          user: GGB00M3
           template: profile-3d-contrib
-          plugin_3d: yes
-          plugin_3d_theme: night-rainbow  # 主题配色
-          plugin_3d_animation: yes        # 启用动画
-          plugin_3d_frame: stacked        # 3D 框架样式
-          # 其他必要参数
-          filename: github-3d.svg  # 指定输出文件名（重要！）
+          filename: github-3d.svg
+          
+          # 插件配置
+          plugins: 3d
+          plugin_3d_theme: night-rainbow
+          plugin_3d_animation: true
+          plugin_3d_frame: stacked
+          
+          # 增强配置
           config_timezone: Asia/Shanghai
-          # 可以移除不需要的模块（如 base 参数不适用于 3D 模板）
+          cached: true  # 启用缓存
+          commits_auto_push: true  # 自动提交文件
+          plugin_3d_steps: 64  # 渲染精度
