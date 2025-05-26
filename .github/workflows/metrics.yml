@@ -1,0 +1,37 @@
+name: 3D Contribution Metrics
+on:
+  schedule:
+    - cron: "0 */6 * * *"  # 每6小时运行一次（UTC时间）
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]   # 统一分支名称格式
+
+jobs:
+  generate-3d:
+    runs-on: ubuntu-latest
+    environment: 
+      name: production    # 需要匹配仓库设置的环境名称
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Generate 3D SVG
+        uses: lowlighter/metrics@latest
+        with:
+          token: ${{ secrets.METRICS_TOKEN }}  # 需要提前配置仓库secret
+          user: GGB00M3
+          template: profile-3d-contrib  # 核心3D模板
+          filename: github-3d.svg       # 输出文件名
+          
+          # 3D插件参数
+          plugin_3d: yes                # 明确启用3D插件
+          plugin_3d_theme: night-rainbow
+          plugin_3d_animation: yes
+          plugin_3d_frame: stacked
+          
+          # 时区配置（可选但推荐）
+          config_timezone: Asia/Shanghai
+          
+          # 性能优化参数（可选）
+          cached: yes                   # 启用缓存
+          plugin_3d_steps: 64          # 渲染精度（默认值）
