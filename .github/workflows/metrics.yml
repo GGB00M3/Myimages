@@ -1,48 +1,45 @@
 name: 3D Contribution Metrics
 on:
   schedule:
-    - cron: "0 */6 * * *"  # 每6小时运行一次（UTC时间）
+    - cron: "0 */6 * * *"  # 每6小时运行一次UTC时间
   workflow_dispatch:
   push:
-    branches: [ "main" ]   # 统一分支名称格式
+    branches: [ "main" ]
 
 jobs:
   generate-3d:
     runs-on: ubuntu-latest
     environment: 
-      name: production    # 需要匹配仓库设置的环境名称
-  github-metrics:
+      name: production  # 需先在仓库设置中创建该环境
+    
+    # 正确位置的权限配置
     permissions:
       contents: write
       actions: read
       checks: write
-    steps:
-
-        with:
-          # 双保险令牌配置
-          token: ${{ secrets.GITHUB_TOKEN || secrets.METRICS_TOKEN }}
-          # 其他参数保持不变...
-
+    
     steps:
       - name: Generate 3D SVG
         uses: lowlighter/metrics@latest
         with:
-          # 双保险令牌配置
+          # 令牌优先级配置
           token: ${{ secrets.GITHUB_TOKEN || secrets.METRICS_TOKEN }}
-          # 其他参数保持不变...
-          user: GGB00M3
-          template: profile-3d-contrib  # 核心3D模板
-          filename: github-3d.svg       # 输出文件名
           
-          # 3D插件参数
-          plugin_3d: yes                # 明确启用3D插件
+          # 核心配置
+          user: GGB00M3
+          template: profile-3d-contrib
+          filename: github-3d.svg
+          
+          # 3D插件配置（最新语法）
+          plugins: 3d  # 替代旧版 plugin_3d 参数
           plugin_3d_theme: night-rainbow
-          plugin_3d_animation: yes
+          plugin_3d_animation: true  # 使用布尔值替代 yes
           plugin_3d_frame: stacked
           
-          # 时区配置（可选但推荐）
+          # 增强配置
           config_timezone: Asia/Shanghai
+          cached: true
+          plugin_3d_steps: 64
           
-          # 性能优化参数（可选）
-          cached: yes                   # 启用缓存
-          plugin_3d_steps: 64          # 渲染精度（默认值）
+          # 推荐增加的缓存配置
+          commits_auto_push: true  # 自动提交生成的SVG
